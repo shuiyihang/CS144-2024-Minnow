@@ -2,15 +2,35 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <span>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 void get_URL( const string& host, const string& path )
 {
-  cerr << "Function called: get_URL(" << host << ", " << path << ")\n";
-  cerr << "Warning: get_URL() has not been implemented yet.\n";
+  cout << "Function called: get_URL(" << host << ", " << path << ")\n";
+  // cerr << "Warning: get_URL() has not been implemented yet.\n";
+  unique_ptr<TCPSocket> client = std::make_unique<TCPSocket>();
+
+  client->connect(Address(host,"http"));
+
+
+  vector<string> req = {"GET " + path + " HTTP/1.1\r\n",\
+                        "HOST: "+ host +"\r\n",\
+                        "Connection: close\r\n",\
+                        "\r\n"};
+  client->write(req);
+
+  string response;
+  while(!client->eof()){
+    client->read(response);
+    cout << response;
+  }
+
+  client->close();
 }
 
 int main( int argc, char* argv[] )

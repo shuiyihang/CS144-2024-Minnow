@@ -2,6 +2,7 @@
 
 #include "conversions.hh"
 #include "exception.hh"
+#include "wrapping_integers.hh"
 
 #include <memory>
 #include <stdexcept>
@@ -13,7 +14,7 @@
 class ExpectationViolation : public std::runtime_error
 {
 public:
-  static constexpr std::string boolstr( bool b ) { return b ? "true" : "false"; }
+  static constexpr const char* boolstr( bool b ) { return b ? "true" : "false"; }
 
   explicit ExpectationViolation( const std::string& msg ) : std::runtime_error( msg ) {}
 

@@ -86,7 +86,7 @@ void FileDescriptor::read( string& buffer )
     buffer.resize( kReadBufferSize );
   }
 
-  const ssize_t bytes_read = ::read( fd_num(), buffer.data(), buffer.size() );
+  const ssize_t bytes_read = ::read( fd_num(), buffer.data(), buffer.size() );// 默认是阻塞读
   if ( bytes_read < 0 ) {
     if ( internal_fd_->non_blocking_ and ( errno == EAGAIN or errno == EINPROGRESS ) ) {
       buffer.clear();
