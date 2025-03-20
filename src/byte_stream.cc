@@ -5,7 +5,12 @@
 
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ),contain_size_(capacity+1), buf_(contain_size_){
+ByteStream::ByteStream( uint64_t capacity ) 
+: capacity_( capacity )
+, buffer_()
+, prefix_(0)
+, elem_nums_(0)
+{
 
 }
 
@@ -18,21 +23,13 @@ bool Writer::is_closed() const
 void Writer::push( string data )
 {
   uint64_t data_len = data.size();
-  uint64_t push_len = data_len > available_capacity() ? available_capacity() : data_len;
-  string_view push_data = string_view(data).substr(0,push_len);
-  if(contain_size_ - wof_ < push_len){
-    uint64_t front_part = contain_size_ - wof_;
-    std::copy(push_data.cbegin(),push_data.cbegin()+front_part,buf_.begin()+wof_);
-    std::copy(push_data.cbegin()+front_part, push_data.cend(), buf_.begin());
-  }else{
-    std::copy(push_data.cbegin(), push_data.cend(), buf_.begin()+wof_);
-  }
-
-  wof_ += push_len;
-  wof_ %= contain_size_;
+  uint64_t push_len = min(available_capacity(),data_len);
+  if(push_len == 0)return;// 一定要min之后
+  
+  data.resize(push_len);
+  buffer_.push(move(data));
   total_push_bytes_ += push_len;
-
-  elem_n += push_len;
+  elem_nums_ += push_len;
 }
 
 void Writer::close()
@@ -44,7 +41,7 @@ void Writer::close()
 uint64_t Writer::available_capacity() const
 {
   // Your code here.
-  return capacity_ - elem_nums();
+  return capacity_ - elem_nums_;
 }
 
 uint64_t Writer::bytes_pushed() const
@@ -56,7 +53,7 @@ uint64_t Writer::bytes_pushed() const
 bool Reader::is_finished() const
 {
   // Your code here.
-  return is_empty() && closed_;
+  return (elem_nums_ == 0) && closed_;
 }
 
 uint64_t Reader::bytes_popped() const
@@ -65,16 +62,13 @@ uint64_t Reader::bytes_popped() const
   return total_pop_bytes_;
 }
 
-string Reader::peek() const
+string_view Reader::peek() const
 {
   // Your code here.
-  string res;
-  if(rof_ + elem_nums() > contain_size_){
-    res.append(buf_.cbegin()+rof_, buf_.cend());
-    res.append(buf_.cbegin(), buf_.cbegin()+wof_);
-  }else{
-    res.append(buf_.cbegin()+rof_, buf_.cbegin()+rof_+elem_nums());
-  }
+  if(elem_nums_ == 0) return string_view{};
+
+  string_view res(buffer_.front());
+  res.remove_prefix(prefix_);
 
   return res;
 }
@@ -82,16 +76,26 @@ string Reader::peek() const
 void Reader::pop( uint64_t len )
 {
   // Your code here.
-  uint64_t pop_len = len > elem_nums() ? elem_nums() : len;
-  rof_ += pop_len;
-  rof_ %= contain_size_;
-  total_pop_bytes_ += pop_len;
+  uint64_t pop_len = min(len,elem_nums_);
 
-  elem_n -= pop_len;
+  total_pop_bytes_ += pop_len;
+  elem_nums_ -= pop_len;
+
+  while (pop_len) {
+    if(pop_len >= buffer_.front().size() - prefix_){
+      pop_len -= (buffer_.front().size() - prefix_);
+      buffer_.pop();
+      prefix_ = 0;
+    }else{
+      prefix_ += pop_len;
+      pop_len = 0;
+    }
+  }
+  
 }
 
 uint64_t Reader::bytes_buffered() const
 {
   // Your code here.
-  return elem_nums();
+  return elem_nums_;
 }
