@@ -59,4 +59,8 @@ private:
 private:
   uint64_t first_unacceptable() const { return first_unassembled_ + output_.writer().available_capacity();}
   void check_stream_close();
+
+public:
+  uint64_t first_unassembled(){ return first_unassembled_; }
+  void set_stream_err() { output_.set_error(); }
 };
