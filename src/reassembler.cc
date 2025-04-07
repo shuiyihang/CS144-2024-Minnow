@@ -114,7 +114,7 @@ void Reassembler::check_stream_close()
 {
   Writer& writer = output_.writer();
   if(is_end_ && first_unassembled_ == endof_index_){
-    std::cout << "first_unassembled_: " << first_unassembled_ << std::endl;
+    // std::cout << "first_unassembled_: " << first_unassembled_ << std::endl;
     writer.close();
   }
 }

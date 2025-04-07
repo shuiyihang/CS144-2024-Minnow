@@ -7,13 +7,15 @@
 #include <string>
 #include <vector>
 
+#include "tcp_minnow_socket.hh"
+
 using namespace std;
 
 void get_URL( const string& host, const string& path )
 {
   cout << "Function called: get_URL(" << host << ", " << path << ")\n";
   // cerr << "Warning: get_URL() has not been implemented yet.\n";
-  unique_ptr<TCPSocket> client = std::make_unique<TCPSocket>();
+  unique_ptr<CS144TCPSocket> client = std::make_unique<CS144TCPSocket>();
 
   client->connect(Address(host,"http"));
 
