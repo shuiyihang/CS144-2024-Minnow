@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -149,6 +150,21 @@ void FileDescriptor::read( vector<string>& buffers )
       remaining_size = 0;
     }
   }
+
+  // if(bytes_read > 0){
+  //   std::cerr << ">>>>>>>>>>>receive data len: " << bytes_read << std::endl; // syh
+  //   for (auto& buf : buffers) {
+  //     for (auto ch : buf) {
+  //         std::cout << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+  //                   << static_cast<int>(static_cast<unsigned char>(ch)) << " ";
+  //     }
+  //     std::cout << std::endl;
+  // }
+
+  //   std::cout << std::endl;
+  // }
+
+
 }
 
 size_t FileDescriptor::write( string_view buffer )

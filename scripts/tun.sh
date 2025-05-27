@@ -17,11 +17,19 @@ start_tun () {
     # Apply NAT (masquerading) only to traffic from CS144's network devices
     iptables -t nat -A PREROUTING -s ${TUN_IP_PREFIX}.${TUNNUM}.0/24 -j CONNMARK --set-mark ${TUNNUM}
     iptables -t nat -A POSTROUTING -j MASQUERADE -m connmark --mark ${TUNNUM}
+
+    iptables -A FORWARD -i tun144 -o ens33 -j ACCEPT
+    iptables -A FORWARD -i ens33 -o tun144 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
     echo 1 > /proc/sys/net/ipv4/ip_forward
 }
 
 stop_tun () {
     local TUNDEV="tun$1"
+    
+    iptables -D FORWARD -i tun144 -o ens33 -j ACCEPT
+    iptables -D FORWARD -i ens33 -o tun144 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
     iptables -t nat -D PREROUTING -s ${TUN_IP_PREFIX}.${1}.0/24 -j CONNMARK --set-mark ${1}
     iptables -t nat -D POSTROUTING -j MASQUERADE -m connmark --mark ${1}
     ip tuntap del mode tun name "$TUNDEV"
@@ -69,7 +77,7 @@ check_sudo () {
 if [ -z "$1" ] || ([ "$1" != "start" ] && [ "$1" != "stop" ] && [ "$1" != "restart" ] && [ "$1" != "check" ]); then
     show_usage
 fi
-MODE=$1; shift
+MODE=$1; shift  #   $@表示传递给脚本的所有参数  shift移除第一个参数，使$@只包含后续参数
 
 # set default argument
 if [ "$#" = "0" ]; then

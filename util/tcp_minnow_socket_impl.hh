@@ -64,7 +64,7 @@ TCPMinnowSocket<AdaptT>::TCPMinnowSocket( std::pair<FileDescriptor, FileDescript
 template<TCPDatagramAdapter AdaptT>
 void TCPMinnowSocket<AdaptT>::_initialize_TCP( const TCPConfig& config )
 {
-  _tcp.emplace( config );
+  _tcp.emplace( config );// 销毁旧值，使用参数原地构造
 
   // Set up the event loop
 
@@ -86,8 +86,8 @@ void TCPMinnowSocket<AdaptT>::_initialize_TCP( const TCPConfig& config )
     _datagram_adapter.fd(),
     Direction::In,
     [&] {
-      if ( auto seg = _datagram_adapter.read() ) {
-        _tcp->receive( std::move( seg.value() ), [&]( auto x ) { _datagram_adapter.write( x ); } );
+      if ( auto seg = _datagram_adapter.read() ) { // TCPOverIPv4OverTunFdAdapter 得到IP数据报解析后的结果
+        _tcp->receive( std::move( seg.value() ), [&]( auto x ) { _datagram_adapter.write( x ); } );// syh
       }
 
       // debugging output:
@@ -180,7 +180,7 @@ template<std::derived_from<Socket> SocketType>
 inline std::pair<SocketType, SocketType> socket_pair_helper( int domain, int type, int protocol = 0 )
 {
   std::array<int, 2> fds {};
-  CheckSystemCall( "socketpair", ::socketpair( domain, type, protocol, fds.data() ) );
+  CheckSystemCall( "socketpair", ::socketpair( domain, type, protocol, fds.data() ) ); // 与管道相比是全双工的
   return { SocketType { FileDescriptor { fds[0] } }, SocketType { FileDescriptor { fds[1] } } };
 }
 
@@ -200,6 +200,7 @@ TCPMinnowSocket<AdaptT>::~TCPMinnowSocket()
       // force the other side to exit
       _abort.store( true );
       _tcp_thread.join();
+      close();
     }
   } catch ( const std::exception& e ) {
     std::cerr << "Exception destructing TCPMinnowSocket: " << e.what() << std::endl;

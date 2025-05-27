@@ -15,7 +15,7 @@ void get_URL( const string& host, const string& path )
 {
   cout << "Function called: get_URL(" << host << ", " << path << ")\n";
   // cerr << "Warning: get_URL() has not been implemented yet.\n";
-  unique_ptr<CS144TCPSocket> client = std::make_unique<CS144TCPSocket>();
+  auto client = std::make_unique<CS144TCPSocket>();
 
   client->connect(Address(host,"http"));
 
@@ -32,7 +32,7 @@ void get_URL( const string& host, const string& path )
     cout << response;
   }
 
-  client->close();
+  // client->close();
 }
 
 int main( int argc, char* argv[] )
