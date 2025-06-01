@@ -28,7 +28,6 @@ protected:
   uint64_t capacity_;
   bool error_ {};
 
-  
   bool closed_ = false; // private mem can't be access by derived class
   std::queue<std::string> buffer_;
   uint64_t total_push_bytes_ = 0;

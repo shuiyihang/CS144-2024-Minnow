@@ -21,15 +21,15 @@ public:
     : input_( std::move( input ) )
     , isn_( isn )
     , initial_RTO_ms_( initial_RTO_ms )
-    , syn_sent_(false)
-    , fin_sent_(false)
-    , timer_running_(false)
-    , time_since_last_tran_(0)
-    , retran_timeout_(initial_RTO_ms_)
-    , consecutive_retran_(0)
-    , window_size_(1)
-    , ackno_(0)
-    , next_seqno_(0)
+    , syn_sent_( false )
+    , fin_sent_( false )
+    , timer_running_( false )
+    , time_since_last_tran_( 0 )
+    , retran_timeout_( initial_RTO_ms_ )
+    , consecutive_retran_( 0 )
+    , window_size_( 1 )
+    , ackno_( 0 )
+    , next_seqno_( 0 )
     , outstanding_seg_()
   {}
 
@@ -69,15 +69,14 @@ private:
   bool timer_running_;
   uint64_t time_since_last_tran_;
   uint64_t retran_timeout_;
-  uint64_t consecutive_retran_;// 连续重传的次数
+  uint64_t consecutive_retran_; // 连续重传的次数
   uint64_t window_size_;
-  uint64_t ackno_;// 最大被ack的绝对序列号
+  uint64_t ackno_; // 最大被ack的绝对序列号
   uint64_t next_seqno_;
   std::deque<std::pair<uint64_t, TCPSenderMessage>> outstanding_seg_;
 
 private:
   void timer_start();
   void timer_stop();
-  inline void handle_fin_and_rst(TCPSenderMessage& msg,uint64_t space_left);
-
+  inline void handle_fin_and_rst( TCPSenderMessage& msg, uint64_t space_left );
 };

@@ -64,7 +64,7 @@ TCPMinnowSocket<AdaptT>::TCPMinnowSocket( std::pair<FileDescriptor, FileDescript
 template<TCPDatagramAdapter AdaptT>
 void TCPMinnowSocket<AdaptT>::_initialize_TCP( const TCPConfig& config )
 {
-  _tcp.emplace( config );// 销毁旧值，使用参数原地构造
+  _tcp.emplace( config ); // 销毁旧值，使用参数原地构造
 
   // Set up the event loop
 
@@ -87,7 +87,7 @@ void TCPMinnowSocket<AdaptT>::_initialize_TCP( const TCPConfig& config )
     Direction::In,
     [&] {
       if ( auto seg = _datagram_adapter.read() ) { // TCPOverIPv4OverTunFdAdapter 得到IP数据报解析后的结果
-        _tcp->receive( std::move( seg.value() ), [&]( auto x ) { _datagram_adapter.write( x ); } );// syh
+        _tcp->receive( std::move( seg.value() ), [&]( auto x ) { _datagram_adapter.write( x ); } ); // syh
       }
 
       // debugging output:

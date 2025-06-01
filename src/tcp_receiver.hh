@@ -28,6 +28,6 @@ public:
 
 private:
   Reassembler reassembler_;
-  bool syn_flag_{false};
-  Wrap32 zero_point_{0};
+  bool syn_flag_ { false };
+  Wrap32 zero_point_ { 0 };
 };

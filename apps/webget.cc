@@ -17,18 +17,15 @@ void get_URL( const string& host, const string& path )
   // cerr << "Warning: get_URL() has not been implemented yet.\n";
   auto client = std::make_unique<CS144TCPSocket>();
 
-  client->connect(Address(host,"http"));
+  client->connect( Address( host, "http" ) );
 
-
-  vector<string> req = {"GET " + path + " HTTP/1.1\r\n",\
-                        "HOST: "+ host +"\r\n",\
-                        "Connection: close\r\n",\
-                        "\r\n"};
-  client->write(req);
+  vector<string> req
+    = { "GET " + path + " HTTP/1.1\r\n", "HOST: " + host + "\r\n", "Connection: close\r\n", "\r\n" };
+  client->write( req );
 
   string response;
-  while(!client->eof()){
-    client->read(response);
+  while ( !client->eof() ) {
+    client->read( response );
     cout << response;
   }
 

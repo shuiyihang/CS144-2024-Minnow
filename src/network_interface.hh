@@ -1,9 +1,14 @@
 #pragma once
 
+#include <cstdint>
+#include <list>
 #include <queue>
+#include <tuple>
+#include <unordered_map>
 
 #include "address.hh"
 #include "ethernet_frame.hh"
+#include "ethernet_header.hh"
 #include "ipv4_datagram.hh"
 
 // A "network interface" that connects IP (the internet layer, or network layer)
@@ -81,4 +86,15 @@ private:
 
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
+
+  static constexpr uint64_t EXPIRE_TIME = 30 * 1000; // 30s 缓存超时时间
+  std::unordered_map<uint32_t, std::tuple<EthernetAddress, uint64_t>> arp_cached;
+
+  static constexpr uint64_t ARP_TIMEOUT_TTL = 5 * 1000; // arp查询超时时间
+  std::unordered_map<uint32_t, std::list<InternetDatagram>> waiting_dgram;
+  std::unordered_map<uint32_t, uint64_t> waiting_arp_rsp;
+
+private:
+  template<typename DatagramType>
+  void send( const EthernetAddress& src, const EthernetAddress& dst, uint16_t type, const DatagramType& dgram );
 };
