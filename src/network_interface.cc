@@ -40,6 +40,9 @@ void NetworkInterface::send_datagram( const InternetDatagram& dgram, const Addre
     send( ethernet_address_, std::get<0>( arp_cached[next_hop.ipv4_numeric()] ), EthernetHeader::TYPE_IPv4, dgram );
   } else {
     // 暂时没有先将 同一IP的数据报缓存下来，发送arp查询，等到arp reply时，将数据报发送出去
+    waiting_dgram[next_hop.ipv4_numeric()].push_back( dgram );
+    // std::cout << "[debug]:" << next_hop.ipv4_numeric() << " cached" << std::endl;
+
     if ( waiting_arp_rsp.find( next_hop.ipv4_numeric() ) == waiting_arp_rsp.end() ) {
       // 还没有发送过arp请求
       ARPMessage arp;
@@ -52,7 +55,6 @@ void NetworkInterface::send_datagram( const InternetDatagram& dgram, const Addre
 
       send( ethernet_address_, ETHERNET_BROADCAST, EthernetHeader::TYPE_ARP, arp );
     }
-    waiting_dgram[next_hop.ipv4_numeric()].push_back( dgram );
   }
 }
 
@@ -90,7 +92,10 @@ void NetworkInterface::recv_frame( const EthernetFrame& frame )
         send( ethernet_address_, arp.sender_ethernet_address, EthernetHeader::TYPE_ARP, rsp );
       } else if ( arp.opcode == ARPMessage::OPCODE_REPLY ) {
         // do nothing
+        std::cout << "[debug]: recv arp rsp"
+                  << " sender addr " << arp.sender_ip_address << std::endl;
         if ( waiting_dgram.find( arp.sender_ip_address ) != waiting_dgram.end() ) {
+          std::cout << "[debug]: recv arp rsp,resend dgram" << std::endl;
           waiting_arp_rsp.erase( arp.sender_ip_address );
           for ( auto& dgram : waiting_dgram[arp.sender_ip_address] ) {
             send( ethernet_address_, arp.sender_ethernet_address, EthernetHeader::TYPE_IPv4, dgram );
@@ -120,7 +125,7 @@ void NetworkInterface::tick( const size_t ms_since_last_tick )
   // arp请求
   for ( auto it = waiting_arp_rsp.begin(); it != waiting_arp_rsp.end(); ) {
     if ( it->second <= ms_since_last_tick ) {
-      std::cerr << "arp timeout: [ ip:" << it->first << " ]" << std::endl;
+      std::cerr << "[debug]: arp timeout: [ ip:" << it->first << " ]" << std::endl;
       waiting_dgram.erase( it->first );
       it = waiting_arp_rsp.erase( it );
     } else {
@@ -141,10 +146,7 @@ void NetworkInterface::send( const EthernetAddress& src,
   frame.header.dst = dst;
   frame.header.type = type;
 
-  Serializer s;
-  dgram.serialize( s );
-
-  frame.payload = move( s.output() );
+  frame.payload = serialize( dgram );
   transmit( frame );
 }
 

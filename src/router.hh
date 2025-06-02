@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <memory>
 #include <optional>
 
@@ -32,7 +34,38 @@ public:
   // Route packets between the interfaces
   void route();
 
+  constexpr static uint32_t mask = 0x80000000;
+
 private:
   // The router's collection of network interfaces
   std::vector<std::shared_ptr<NetworkInterface>> _interfaces {};
+
+  class RouteEntry
+  {
+  public:
+    explicit RouteEntry( uint32_t route_prefix,
+                         uint8_t prefix_length,
+                         std::optional<Address> next_hop,
+                         size_t interface_num )
+      : m_route_prefix( route_prefix )
+      , m_prefix_length( prefix_length )
+      , m_next_hop( next_hop )
+      , m_interface_num( interface_num )
+    {}
+
+    uint32_t m_route_prefix;
+    uint8_t m_prefix_length;
+    std::optional<Address> m_next_hop;
+    size_t m_interface_num;
+  };
+  class TrieNode
+  {
+  public:
+    TrieNode() : m_child(), m_val( std::nullopt ) {}
+    std::array<std::unique_ptr<TrieNode>, 2> m_child;
+    std::optional<RouteEntry> m_val;
+  };
+
+  std::unique_ptr<TrieNode> m_root = nullptr;
+  std::optional<RouteEntry> get_next_hop( uint32_t dst );
 };
