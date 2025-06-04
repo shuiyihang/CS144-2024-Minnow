@@ -81,11 +81,11 @@ std::optional<Router::RouteEntry> Router::get_next_hop( uint32_t dst )
   }
 
   res = node->m_val;
-  cerr << "DEBUG: find route dst: " << Address::from_ipv4_numeric( dst ).ip() << " "
-       << Address::from_ipv4_numeric( node->m_val->m_route_prefix ).ip() << "/"
-       << static_cast<int>( node->m_val->m_prefix_length ) << " => "
-       << ( node->m_val->m_next_hop.has_value() ? node->m_val->m_next_hop->ip() : "(direct)" ) << " on interface "
-       << node->m_val->m_interface_num << std::endl;
+  // cerr << "DEBUG: find route dst: " << Address::from_ipv4_numeric( dst ).ip() << " "
+  //      << Address::from_ipv4_numeric( node->m_val->m_route_prefix ).ip() << "/"
+  //      << static_cast<int>( node->m_val->m_prefix_length ) << " => "
+  //      << ( node->m_val->m_next_hop.has_value() ? node->m_val->m_next_hop->ip() : "(direct)" ) << " on interface "
+  //      << node->m_val->m_interface_num << std::endl;
 
   return res;
 }

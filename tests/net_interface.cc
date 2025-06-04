@@ -68,7 +68,7 @@ int main()
       NetworkInterfaceTestHarness test { "typical ARP workflow", local_eth, Address( "4.3.2.1", 0 ) };
 
       const auto datagram = make_datagram( "5.6.7.8", "13.12.11.10" );
-      test.execute( SendDatagram { datagram, Address( "192.168.0.1", 0 ) } );
+      test.execute( SendDatagram { datagram, Address( "192.168.0.1", 0 ) } );// 执行 SendDatagram，不知道 下一跳 192.168.0.1的mac地址所以要发arp请求
 
       // outgoing datagram should result in an ARP request
       test.execute( ExpectFrame { make_frame(
@@ -89,10 +89,10 @@ int main()
           local_eth,
           EthernetHeader::TYPE_ARP, // NOLINTNEXTLINE(*-suspicious-*)
           serialize( make_arp( ARPMessage::OPCODE_REPLY, target_eth, "192.168.0.1", local_eth, "4.3.2.1" ) ) ),
-        {} } );
+        {} } );// 接收到arp回复
 
       test.execute(
-        ExpectFrame { make_frame( local_eth, target_eth, EthernetHeader::TYPE_IPv4, serialize( datagram ) ) } );
+        ExpectFrame { make_frame( local_eth, target_eth, EthernetHeader::TYPE_IPv4, serialize( datagram ) ) } );// 发送数据报
       test.execute( ExpectNoFrame {} );
 
       // any IP reply directed for our Ethernet address should be passed up the stack

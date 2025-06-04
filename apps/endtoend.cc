@@ -98,7 +98,7 @@ private:
 
     void transmit( const NetworkInterface& n [[maybe_unused]], const EthernetFrame& x ) override
     {
-      sockets.first.write( serialize( x ) );
+      sockets.first.write( serialize( x ) ); // 最终应该是写管道一端
     }
   };
 
@@ -196,7 +196,7 @@ void program_body( bool is_client, const string& bounce_host, const string& boun
   auto router_to_host = make_shared<FramesOut>();
   auto router_to_internet = make_shared<FramesOut>();
 
-  UDPSocket internet_socket;
+  UDPSocket internet_socket; // 底层调用socket创建了描述符
   Address bounce_address { bounce_host, bounce_port };
 
   /* let bouncer know where we are */
@@ -263,7 +263,7 @@ void program_body( bool is_client, const string& bounce_host, const string& boun
           if ( debug ) {
             cerr << "     Router->host:     " << summary( f->frames.front() ) << "\n";
           }
-          sock.adapter().frame_fd().write( serialize( f->frames.front() ) );
+          sock.adapter().frame_fd().write( serialize( f->frames.front() ) ); // 向管道中写回
           f->frames.pop();
         },
         [&] { return not router_to_host->frames.empty(); } );
@@ -316,7 +316,7 @@ void program_body( bool is_client, const string& bounce_host, const string& boun
 
   try {
     if ( is_client ) {
-      sock.connect( Address { "172.16.0.100", 1234 } );
+      sock.connect( Address { "172.16.0.100", 1234 } ); // 客户端发起连接
     } else {
       sock.bind( Address { "172.16.0.100", 1234 } );
       sock.listen_and_accept();
@@ -363,7 +363,7 @@ int main( int argc, char* argv[] )
       print_usage( args[0] );
       return EXIT_FAILURE;
     }
-
+    // ./build/apps/endtoend server localhost 3000
     program_body( args[1] == "client"s, args[2], args[3], argc == 5 );
   } catch ( const exception& e ) {
     cerr << e.what() << "\n";

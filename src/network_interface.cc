@@ -92,10 +92,10 @@ void NetworkInterface::recv_frame( const EthernetFrame& frame )
         send( ethernet_address_, arp.sender_ethernet_address, EthernetHeader::TYPE_ARP, rsp );
       } else if ( arp.opcode == ARPMessage::OPCODE_REPLY ) {
         // do nothing
-        std::cout << "[debug]: recv arp rsp"
-                  << " sender addr " << arp.sender_ip_address << std::endl;
+        // std::cout << "[debug]: recv arp rsp"
+        //           << " sender addr " << arp.sender_ip_address << std::endl;
         if ( waiting_dgram.find( arp.sender_ip_address ) != waiting_dgram.end() ) {
-          std::cout << "[debug]: recv arp rsp,resend dgram" << std::endl;
+          // std::cout << "[debug]: recv arp rsp,resend dgram" << std::endl;
           waiting_arp_rsp.erase( arp.sender_ip_address );
           for ( auto& dgram : waiting_dgram[arp.sender_ip_address] ) {
             send( ethernet_address_, arp.sender_ethernet_address, EthernetHeader::TYPE_IPv4, dgram );
@@ -116,7 +116,7 @@ void NetworkInterface::tick( const size_t ms_since_last_tick )
   // 缓存
   for ( auto itr = arp_cached.begin(); itr != arp_cached.end(); ) {
     if ( std::get<1>( itr->second ) <= ms_since_last_tick ) {
-      itr = arp_cached.erase( itr );
+      itr = arp_cached.erase( itr ); // arp缓存过期清除
     } else {
       std::get<1>( itr->second ) -= ms_since_last_tick;
       itr++;
